@@ -80,18 +80,34 @@ class ContactDetailVC: UIViewController {
         saveButton.isEnabled = !firstName.isEmpty && !lastName.isEmpty
     }
     
+    private func updateContactsJSON() {
+        guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+                print("Document directory not found.")
+                return
+            }
+            let fileURL = documentDirectory.appendingPathComponent("data.json")
+
+            do {
+                let jsonData = try JSONEncoder().encode(contacts)
+                try jsonData.write(to: fileURL)
+                print("Contacts JSON file updated successfully.")
+            } catch {
+                print("Error updating contacts JSON file: \(error)")
+            }
+    }
+
+    
     private func loadContactData() {
-        guard let fileURL = Bundle.main.url(forResource: "data", withExtension: "json") else {
-               print("Contacts JSON file not found.")
-               return
-           }
-           
-           do {
-               let jsonData = try Data(contentsOf: fileURL)
-               contacts = try JSONDecoder().decode([Contact].self, from: jsonData)
-           } catch {
-               print("Error decoding contacts data: \(error)")
-           }
+        let fileManager = FileManager.default
+            let documentDirectory = try! fileManager.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+            let fileURL = documentDirectory.appendingPathComponent("data.json")
+
+            do {
+                let jsonData = try Data(contentsOf: fileURL)
+                contacts = try JSONDecoder().decode([Contact].self, from: jsonData)
+            } catch {
+                print("Error decoding contacts data: \(error)")
+            }
     }
     
     @objc private func showDatePicker() {
@@ -164,56 +180,33 @@ class ContactDetailVC: UIViewController {
 
                 return
             }
-        
-    // Reset the border color of the text fields
-        txt_firstName.layer.borderColor = UIColor.clear.cgColor
-        txt_lastName.layer.borderColor = UIColor.clear.cgColor
 
+            // Reset the border color of the text fields
+            txt_firstName.layer.borderColor = UIColor.clear.cgColor
+            txt_lastName.layer.borderColor = UIColor.clear.cgColor
 
-    if isEditingContact, var contact = contacts.first {
-        // Update existing contact
-        contact.firstName = firstName
-        contact.lastName = lastName
-        contact.email = email
-        contact.dob = dob
+            if isEditingContact, let index = contacts.firstIndex(where: { $0.firstName == firstName && $0.lastName == lastName }) {
+                // Update existing contact
+                contacts[index].email = email
+                contacts[index].dob = dob
 
-        // Update the JSON data in the "data.json" file
-        if let jsonData = JSONEncoderHelper.encode(contacts) {
-            guard let fileURL = Bundle.main.url(forResource: "data", withExtension: "json") else {
-                print("Data JSON file not found.")
-                return
+                // Update the JSON data in the "data.json" file
+                updateContactsJSON()
+            } else {
+                // Create new contact
+                let newContact = Contact(id: randomString(length: 10), firstName: firstName, lastName: lastName, email: email, dob: dob)
+                contacts.append(newContact)
+
+                // Update the JSON data in the "data.json" file
+                updateContactsJSON()
+                
             }
-            do {
-                try jsonData.write(to: fileURL)
-            } catch {
-                print("Error updating contact data: \(error)")
-            }
-        }
-    } else {
-        // Create new contact
-        let newContact = Contact(id: self.randomString(length: 10), firstName: firstName, lastName: lastName, email: email, dob: dob)
-        contacts.append(newContact)
 
-        // Save the new contact to the "data.json" file
-        if let jsonData = JSONEncoderHelper.encode(contacts) {
-            guard let fileURL = Bundle.main.url(forResource: "data", withExtension: "json") else {
-                print("Data JSON file not found.")
-                return
-            }
-            do {
-                try jsonData.write(to: fileURL)
-                print("item saved ya")
-            } catch {
-                print("Error saving contact data: \(error)")
-            }
-        }
-    }
+            // Display a success message or perform any other necessary actions
+            print("Contact saved")
 
-    // Display a success message or perform any other necessary actions
-    print("Item saved")
-
-    // Dismiss the view controller
-    dismiss(animated: true)
+            // Dismiss the view controller
+            dismiss(animated: true)
     }
     func randomString(length: Int) -> String {
       let letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"

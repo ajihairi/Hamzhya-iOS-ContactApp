@@ -122,7 +122,6 @@
 			isa = PBXGroup;
 			children = (
 				FB94790E2A1658BC008774DD /* ContactViewModel.swift */,
-				FB9479172A167BAE008774DD /* JSONEncoderHelper.swift */,
 			);
 			path = "View Models";
 			sourceTree = "<group>";
@@ -152,6 +151,7 @@
 			children = (
 				FBABCCD32A164B700088189D /* AppDelegate.swift */,
 				FBABCCD52A164B700088189D /* SceneDelegate.swift */,
+				FB9479172A167BAE008774DD /* JSONEncoderHelper.swift */,
 				FBABCD032A164BD70088189D /* data.json */,
 				FBABCCDC2A164B720088189D /* Assets.xcassets */,
 				FB9478FF2A165829008774DD /* Extensions.swift */,
