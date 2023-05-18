@@ -15,6 +15,7 @@ class ContactsListVC: UIViewController, UICollectionViewDelegate, UICollectionVi
     var isSearchBarVisible = false
     var searchBar: UISearchBar?
     var isSearchBarActive = false
+    var refreshControl = UIRefreshControl()
     
 var filteredContacts: [Contact] = []
     
@@ -23,10 +24,31 @@ var filteredContacts: [Contact] = []
         self.setupUI()
         self.doGetContacts()
         
+    // Add refresh control to collection view
+        refreshControl.addTarget(self, action: #selector(refreshContacts), for: .valueChanged)
+        grid_contact.refreshControl = refreshControl
+        
     }
     
     override func viewDidAppear(_ animated: Bool) {
         self.viewDidLoad()
+    }
+    
+    @objc private func refreshContacts() {
+        // Perform data fetch or update operation
+        
+        // Example: Call doGetContacts() to fetch the contacts again
+        doGetContacts()
+    }
+    
+    private func handleDataFetchComplete() {
+        DispatchQueue.main.async {
+            // Stop the refresh control animation
+            self.refreshControl.endRefreshing()
+            
+            // Reload the collection view data
+            self.grid_contact.reloadData()
+        }
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -108,22 +130,30 @@ var filteredContacts: [Contact] = []
     }
     
     private func doGetContacts() {
-    guard let path = Bundle.main.path(forResource: "data", ofType: "json") else { return }
-        let url = URL(fileURLWithPath: path)
-        
-        do {
-            let jsonData = try Data(contentsOf: url)
-            let contacts = try JSONDecoder().decode([Contact].self, from: jsonData)
-            self.contacts = contacts
-            if !isSearchBarVisible {
-                self.filteredContacts = contacts
-            }
-            DispatchQueue.main.async {
-                self.grid_contact.reloadData()
-            }
-        } catch {
-            print("ERROR: \(error)")
-        }
+    
+        guard let path = Bundle.main.path(forResource: "data", ofType: "json") else { return }
+           let url = URL(fileURLWithPath: path)
+           
+           DispatchQueue.global().async { [weak self] in
+               do {
+                   let jsonData = try Data(contentsOf: url)
+                   let contacts = try JSONDecoder().decode([Contact].self, from: jsonData)
+                   self?.contacts = contacts
+                   if !(self?.isSearchBarVisible ?? false) {
+                       self?.filteredContacts = contacts
+                   }
+                   
+                   DispatchQueue.main.async {
+                       self?.grid_contact.reloadData()
+                       self?.refreshControl.endRefreshing()
+                   }
+               } catch {
+                   print("ERROR: \(error)")
+                   DispatchQueue.main.async {
+                       self?.refreshControl.endRefreshing()
+                   }
+               }
+           }
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {

@@ -13,6 +13,7 @@ class ContactDetailVC: UIViewController {
     @IBOutlet weak var txt_lastName: UITextField!
     @IBOutlet weak var txt_email: UITextField!
     
+    @IBOutlet weak var saveButton: UIBarButtonItem!
     @IBOutlet weak var dateOfBirth: UITextField!
     
     var isEditingContact: Bool = false
@@ -21,16 +22,27 @@ class ContactDetailVC: UIViewController {
     var email: String?
     var dob: String?
     var contacts: [Contact] = [] // Add the contacts array property
+    
 
     override func viewDidLoad() {
         super.viewDidLoad()
         self.setupUI()
         self.loadContactDetail()
         addCalendarIconToTextField()
+        
+        txt_firstName.delegate = self
+        txt_lastName.delegate = self
+        txt_email.delegate = self
+        
+        txt_firstName.returnKeyType = .next
+        txt_lastName.returnKeyType = .next
+        txt_email.returnKeyType = .next
+        
     }
     
     private func setupUI() {
         self.img_contact.makeRounded()
+        saveButton.isEnabled = false
     }
     
     private func loadContactDetail() {
@@ -43,6 +55,29 @@ class ContactDetailVC: UIViewController {
             let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.showDatePicker))
                     self.dateOfBirth.addGestureRecognizer(tapGesture)
         }
+    }
+    @IBAction func firstNameEditing(_ sender: UITextField) {
+        updateSaveButtonState()
+    }
+    @IBAction func lastNameEditing(_ sender: UITextField) {
+        updateSaveButtonState()
+    }
+    @IBAction func textFieldEditingChanged(_ sender: UITextField) {
+        updateSaveButtonState()
+    }
+    
+    @IBAction func dateOfBirthValueChanged(_ sender: UITextField) {
+        updateSaveButtonState()
+    }
+    
+    private func updateSaveButtonState() {
+        let firstName = txt_firstName.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let lastName = txt_lastName.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let email = txt_email.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let dob = dateOfBirth.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        
+        // Enable save button if first name and last name are filled
+        saveButton.isEnabled = !firstName.isEmpty && !lastName.isEmpty
     }
     
     private func loadContactData() {
@@ -103,13 +138,37 @@ class ContactDetailVC: UIViewController {
         }
     
     @IBAction func save(_ sender: UIBarButtonItem) {
-        guard let firstName = txt_firstName.text, !firstName.isEmpty,
-          let lastName = txt_lastName.text, !lastName.isEmpty,
-          let email = txt_email.text, !email.isEmpty,
-          let dob = dateOfBirth.text, !dob.isEmpty else {
-        // Display an alert or error message indicating that required fields are missing
-        return
-    }
+        let firstName = txt_firstName.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            let lastName = txt_lastName.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            let email = txt_email.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            let dob = dateOfBirth.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+
+            // Check if first name and last name are filled
+            if firstName.isEmpty || lastName.isEmpty {
+                // Display an alert or error message indicating that first name and last name are mandatory
+                let alertController = UIAlertController(title: "Missing Information", message: "First name and last name are mandatory.", preferredStyle: .alert)
+                alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                present(alertController, animated: true, completion: nil)
+
+                // Update UI to indicate missing values (red border)
+                if firstName.isEmpty {
+                    txt_firstName.layer.borderColor = UIColor.red.cgColor
+                } else {
+                    txt_firstName.layer.borderColor = UIColor.clear.cgColor
+                }
+                if lastName.isEmpty {
+                    txt_lastName.layer.borderColor = UIColor.red.cgColor
+                } else {
+                    txt_lastName.layer.borderColor = UIColor.clear.cgColor
+                }
+
+                return
+            }
+        
+    // Reset the border color of the text fields
+        txt_firstName.layer.borderColor = UIColor.clear.cgColor
+        txt_lastName.layer.borderColor = UIColor.clear.cgColor
+
 
     if isEditingContact, var contact = contacts.first {
         // Update existing contact
@@ -143,6 +202,7 @@ class ContactDetailVC: UIViewController {
             }
             do {
                 try jsonData.write(to: fileURL)
+                print("item saved ya")
             } catch {
                 print("Error saving contact data: \(error)")
             }
@@ -164,5 +224,20 @@ class ContactDetailVC: UIViewController {
         self.dismiss(animated: true)
     }
     
-    
+}
+
+extension ContactDetailVC: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        switch textField {
+        case txt_firstName:
+            txt_lastName.becomeFirstResponder()
+        case txt_lastName:
+            txt_email.becomeFirstResponder()
+        case txt_email:
+            dateOfBirth.becomeFirstResponder()
+        default:
+            textField.resignFirstResponder()
+        }
+        return true
+    }
 }

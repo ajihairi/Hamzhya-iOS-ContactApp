@@ -111,6 +111,9 @@
                                                 <rect key="frame" x="90.5" y="0.0" width="291.5" height="34"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                 <textInputTraits key="textInputTraits"/>
+                                                <connections>
+                                                    <action selector="firstNameEditing:" destination="pu7-mO-42W" eventType="editingDidEnd" id="WIt-Pp-6r7"/>
+                                                </connections>
                                             </textField>
                                         </subviews>
                                     </stackView>
@@ -127,6 +130,9 @@
                                                 <rect key="frame" x="89.5" y="0.0" width="292.5" height="34"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                 <textInputTraits key="textInputTraits"/>
+                                                <connections>
+                                                    <action selector="lastNameEditing:" destination="pu7-mO-42W" eventType="editingDidEnd" id="v0f-NY-FGT"/>
+                                                </connections>
                                             </textField>
                                         </subviews>
                                     </stackView>
@@ -154,6 +160,9 @@
                                                 <rect key="frame" x="61" y="0.0" width="321" height="34"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                 <textInputTraits key="textInputTraits"/>
+                                                <connections>
+                                                    <action selector="textFieldEditingChanged:" destination="pu7-mO-42W" eventType="editingDidEnd" id="bWU-yb-9xH"/>
+                                                </connections>
                                             </textField>
                                         </subviews>
                                     </stackView>
@@ -170,6 +179,9 @@
                                                 <rect key="frame" x="48.5" y="0.0" width="333.5" height="34"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                 <textInputTraits key="textInputTraits"/>
+                                                <connections>
+                                                    <action selector="dateOfBirthValueChanged:" destination="pu7-mO-42W" eventType="editingDidEnd" id="noy-3X-gn9"/>
+                                                </connections>
                                             </textField>
                                         </subviews>
                                     </stackView>
@@ -196,6 +208,7 @@
                     <connections>
                         <outlet property="dateOfBirth" destination="F2p-7m-2QV" id="Hjl-Mn-gdm"/>
                         <outlet property="img_contact" destination="sNx-Qq-oJO" id="GPc-Dc-8rK"/>
+                        <outlet property="saveButton" destination="R7P-eh-r2W" id="Kui-Kp-xMh"/>
                         <outlet property="txt_email" destination="MLy-po-5fi" id="6Tv-La-OgW"/>
                         <outlet property="txt_firstName" destination="1jA-4D-omZ" id="6pb-Ai-PdB"/>
                         <outlet property="txt_lastName" destination="dgR-TH-b5Z" id="65t-cP-g0c"/>
